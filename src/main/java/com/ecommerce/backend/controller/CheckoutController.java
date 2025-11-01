@@ -20,47 +20,46 @@ public class CheckoutController {
     private final CartItemRepository cartItemRepository;
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
-    private final AddressRepository addressRepository; // ✅ added for shipping address
+    private final AddressRepository addressRepository;
 
-    // ✅ Checkout API (with address)
+    // ✅ Checkout API with address
     @PostMapping("/{email}/{addressId}")
-    public ResponseEntity<String> checkout(
-            @PathVariable String email,
-            @PathVariable Long addressId
-    ) {
+    public ResponseEntity<String> checkout(@PathVariable String email, @PathVariable Long addressId) {
+
         // 1️⃣ Find user
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // 2️⃣ Find address
-        Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
-
-        // 3️⃣ Get cart for user
+        // 2️⃣ Get user cart
         Cart cart = cartRepository.findByUser(user)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
 
+        // 3️⃣ Get cart items
         List<CartItem> cartItems = cartItemRepository.findByCart(cart);
         if (cartItems.isEmpty()) {
             throw new ResourceNotFoundException("Cart is empty, cannot checkout");
         }
 
-        // 4️⃣ Calculate total amount
+        // 4️⃣ Find selected address
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
+
+        // 5️⃣ Calculate total
         double totalAmount = cartItems.stream()
                 .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
                 .sum();
 
-        // 5️⃣ Create new Order
+        // 6️⃣ Create new Order
         Order order = new Order();
         order.setUser(user);
         order.setItems(cartItems);
-        order.setAddress(address); // ✅ link address
+        order.setAddress(address); // ✅ attach delivery address
         order.setTotalAmount(totalAmount);
         order.setPaymentStatus("PENDING");
         order.setOrderDate(LocalDateTime.now());
         orderRepository.save(order);
 
-        // 6️⃣ Create new Payment
+        // 7️⃣ Create new Payment
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setPaymentMethod("UPI");
@@ -69,9 +68,10 @@ public class CheckoutController {
         payment.setPaymentDate(LocalDateTime.now());
         paymentRepository.save(payment);
 
-        // 7️⃣ Clear cart items
+        // 8️⃣ Clear Cart after checkout
         cartItemRepository.deleteAll(cartItems);
 
-        return ResponseEntity.ok("✅ Checkout successful! Order ID: " + order.getId());
+        return ResponseEntity.ok("✅ Checkout successful! Order ID: " + order.getId() +
+                ", Address: " + address.getStreet() + ", " + address.getCity());
     }
 }

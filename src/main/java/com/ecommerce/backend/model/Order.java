@@ -11,6 +11,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "orders")
 public class Order {
 
@@ -18,20 +19,20 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private double totalAmount;
-    private String paymentStatus;
-    private LocalDateTime orderDate;
-
-    // 🔗 Relationship with User
     @ManyToOne
-    @JoinColumn(name = "user_id")
     private User user;
 
-    // 🔗 Relationship with Cart Items
     @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "order_id")
     private List<CartItem> items;
 
-    // 🏡 New — Relationship with Address
+    private double totalAmount;
+
+    private String paymentStatus;
+
+    private LocalDateTime orderDate;
+
+    // 🏡 New field: Link Address
     @ManyToOne
     @JoinColumn(name = "address_id")
     private Address address;
