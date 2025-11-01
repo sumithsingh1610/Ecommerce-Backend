@@ -19,20 +19,24 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private LocalDateTime orderDate;
+
+    private Double totalAmount;
+
+    // ✅ Add this field
+    private String status; // e.g. "PENDING", "PAID", "SHIPPED", "DELIVERED"
+
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "order_id")
-    private List<CartItem> items;
+    private List<OrderItem> items;
 
-    private double totalAmount;
+    @OneToOne
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
 
-    private String paymentStatus;
-
-    private LocalDateTime orderDate;
-
-    // 🏡 New field: Link Address
     @ManyToOne
     @JoinColumn(name = "address_id")
     private Address address;
