@@ -1,11 +1,10 @@
 package com.ecommerce.backend.repository;
 
-import com.ecommerce.backend.model.Order;
 import com.ecommerce.backend.model.Payment;
+import com.ecommerce.backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.Optional;
+import java.util.List;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    Optional<Payment> findByOrder(Order order);
+    List<Payment> findByOrderUser(User user);
 }
