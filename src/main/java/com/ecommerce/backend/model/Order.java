@@ -7,24 +7,33 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double totalAmount;
-
-    private String paymentStatus;  // 👈 added this line
-
-    private LocalDateTime orderDate;
-
+    // ✅ Each order belongs to one user
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
+    // ✅ The items in the order (we’ll use CartItem for now)
     @OneToMany(cascade = CascadeType.ALL)
-    private List<OrderItem> items;
+    @JoinColumn(name = "order_id")
+    private List<CartItem> items;
+
+    // ✅ Total price of all items
+    private double totalAmount;
+
+    // ✅ Payment status (PENDING / SUCCESS)
+    private String paymentStatus;
+
+    // ✅ Timestamp of order placement
+    private LocalDateTime orderDate;
 }
