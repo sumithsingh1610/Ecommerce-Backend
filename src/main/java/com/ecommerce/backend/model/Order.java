@@ -11,29 +11,28 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Table(name = "orders")
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ✅ Each order belongs to one user
+    private double totalAmount;
+    private String paymentStatus;
+    private LocalDateTime orderDate;
+
+    // 🔗 Relationship with User
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    // ✅ The items in the order (we’ll use CartItem for now)
+    // 🔗 Relationship with Cart Items
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "order_id")
     private List<CartItem> items;
 
-    // ✅ Total price of all items
-    private double totalAmount;
-
-    // ✅ Payment status (PENDING / SUCCESS)
-    private String paymentStatus;
-
-    // ✅ Timestamp of order placement
-    private LocalDateTime orderDate;
+    // 🏡 New — Relationship with Address
+    @ManyToOne
+    @JoinColumn(name = "address_id")
+    private Address address;
 }
